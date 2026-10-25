@@ -1,0 +1,63 @@
+name: Update converted proxy list
+
+on:
+  schedule:
+    - cron: "3 16 * * *"  # UTC 16:03 = 北京时间 00:03
+    - cron: "3 17 * * *"  # UTC 17:03 = 北京时间 01:03
+    - cron: "3 18 * * *"  # UTC 18:03 = 北京时间 02:03
+    - cron: "3 19 * * *"  # UTC 19:03 = 北京时间 03:03
+    - cron: "3 20 * * *"  # UTC 20:03 = 北京时间 04:03
+    - cron: "3 21 * * *"  # UTC 21:03 = 北京时间 05:03
+    - cron: "3 22 * * *"  # UTC 22:03 = 北京时间 06:03
+    - cron: "3 23 * * *"  # UTC 23:03 = 北京时间 07:03
+    - cron: "3 0 * * *"   # UTC 00:03 = 北京时间 08:03
+    - cron: "3 1 * * *"   # UTC 01:03 = 北京时间 09:03
+    - cron: "3 2 * * *"   # UTC 02:03 = 北京时间 10:03
+    - cron: "3 3 * * *"   # UTC 03:03 = 北京时间 11:03
+    - cron: "3 4 * * *"   # UTC 04:03 = 北京时间 12:03
+    - cron: "3 5 * * *"   # UTC 05:03 = 北京时间 13:03
+    - cron: "3 6 * * *"   # UTC 06:03 = 北京时间 14:03
+    - cron: "3 7 * * *"   # UTC 07:03 = 北京时间 15:03
+    - cron: "3 8 * * *"   # UTC 08:03 = 北京时间 16:03
+    - cron: "3 9 * * *"   # UTC 09:03 = 北京时间 17:03
+    - cron: "3 10 * * *"  # UTC 10:03 = 北京时间 18:03
+    - cron: "3 11 * * *"  # UTC 11:03 = 北京时间 19:03
+    - cron: "3 12 * * *"  # UTC 12:03 = 北京时间 20:03
+    - cron: "3 13 * * *"  # UTC 13:03 = 北京时间 21:03
+    - cron: "3 14 * * *"  # UTC 14:03 = 北京时间 22:03
+    - cron: "3 15 * * *"  # UTC 15:03 = 北京时间 23:03
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-converted-proxy
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Convert proxy list
+        run: python3 scripts/convert_proxy.py
+
+      - name: Commit and push if changed
+        run: |
+          if [ ! -f proxy_converted.txt ]; then
+            echo "proxy_converted.txt not found"
+            exit 1
+          fi
+          git add proxy_converted.txt
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update converted proxy list"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push
