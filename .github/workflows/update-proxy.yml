@@ -1,9 +1,8 @@
 name: Update converted proxy list
 
 on:
-  schedule:
-    - cron: "3 * * * *"  # 每小时第 3 分钟（UTC），即北京时间每小时 :03
-  workflow_dispatch:
+  repository_dispatch:
+    types: [cron-trigger]
 
 permissions:
   contents: write
